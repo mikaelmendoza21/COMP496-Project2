@@ -1,7 +1,3 @@
-package jobScheduler;
-
-import java.util.ArrayList;
-
 /**
  COMP496 - 11am - CSUN Spring 2017
  Project 2 - JobScheduler
@@ -9,6 +5,10 @@ import java.util.ArrayList;
  Mikael A. Mendoza
  Jonathan Villegas
  */
+
+package jobScheduler;
+
+import java.util.ArrayList;
 
 public class JobScheduler
 {
@@ -18,32 +18,42 @@ public class JobScheduler
     public JobScheduler( int[] joblength, int[] deadline, int[] profit)
     {
         //Set nJobs
+        nJobs = joblength.length;
+
         //Fill jobs array. The kth job entered has JobNo = k;
+        jobs = new Job[nJobs];
+        for(int i = 0; i < nJobs; i++){
+            jobs[i] =  new Job(i+1, joblength[i], deadline[i], profit[i]);
+        }
     }
 
     public void printJobs()  //prints the array jobs
-    {  }
+    {
+        for(int i = 0; i < nJobs; i++){
+            System.out.print("\n" + jobs[i].toString());
+        }
+    }
 
-    //Brute force. Try all n! orderings. Return the schedule with the most profit
-    public Schedule bruteForceSolution()
-    {   }
-
-
-    public Schedule makeScheduleEDF()
-    //earliest deadline first schedule. Schedule items contributing 0 to total profit last
-    {  }
-
-    public Schedule makeScheduleSJF()
-    //shortest job first schedule. Schedule items contributing 0 to total profit last
-    {  }
-
-    public Schedule makeScheduleHPF()
-    //highest profit first schedule. Schedule items contributing 0 to total profit last
-    {  }
-
-
-    public Schedule newApproxSchedule() //Your own creation. Must be <= O(n3)
-    {  }
+//    //Brute force. Try all n! orderings. Return the schedule with the most profit
+//    public Schedule bruteForceSolution()
+//    {   }
+//
+//
+//    public Schedule makeScheduleEDF()
+//    //earliest deadline first schedule. Schedule items contributing 0 to total profit last
+//    {  }
+//
+//    public Schedule makeScheduleSJF()
+//    //shortest job first schedule. Schedule items contributing 0 to total profit last
+//    {  }
+//
+//    public Schedule makeScheduleHPF()
+//    //highest profit first schedule. Schedule items contributing 0 to total profit last
+//    {  }
+//
+//
+//    public Schedule newApproxSchedule() //Your own creation. Must be <= O(n3)
+//    {  }
 
 }//end of JobScheduler class
 
@@ -57,14 +67,14 @@ class Job
     int start;
     int finish;
 
-
+    //constructor
     public Job( int jn , int len, int d, int p)
     {
         jobNumber = jn; length = len; deadline = d;
         profit = p;  start = -1;  finish = -1;
     }
 
-
+    //this method outputs the Job as a String specifying its attributes
     public String toString()
     {
         return "#" + jobNumber + ":(" + length + ","
@@ -89,11 +99,15 @@ class Schedule
     }
 
     public void add(Job job)
-    {  }
+    {
+        schedule.add(job);  //add job to schedule
+    }
 
 
     public int getProfit()
-    {    }
+    {
+        return profit;
+    }
 
     public String toString()
     {
