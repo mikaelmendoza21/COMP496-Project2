@@ -35,11 +35,49 @@ public class Main {
         }
 
         //create the JobScheduler object
-        JobScheduler jobs = new JobScheduler(job_length, job_deadline, job_profit);
+        JobScheduler schedule = new JobScheduler(job_length, job_deadline, job_profit);
         System.out.println("\nHere are the Jobs you wish to schedule" +
                             "\n[Format: Job#(length, deadline, profit, start, finish)]");
-        jobs.printJobs();
+        schedule.printJobs();
         //--------------------------
+
+        //Testing mergeSort by Deadline
+        System.out.println("\nTesting mergeSort by Deadline");
+
+        int[] sortedJobs = schedule.mergeSort("deadline");
+        boolean sortTest = schedule.isSorted(sortedJobs);
+        if(sortTest){
+            System.out.println("Jobs were successfully sorted by Deadline");
+        }
+        else{
+            System.out.println("!!!mergeSort by Deadline Failed!");
+        }
+
+        //Testing mergeSort by Length
+        System.out.println("\nTesting mergeSort by Length");
+        sortedJobs = schedule.mergeSort("length");
+        sortTest = schedule.isSorted(sortedJobs);
+        if(sortTest){
+            System.out.println("Jobs were successfully sorted by Length");
+        }
+        else{
+            System.out.println("!!!mergeSort by Length Failed!");
+        }
+
+        //Testing mergeSort by Profit
+        System.out.println("\nTesting mergeSort by Profit");
+        sortedJobs = schedule.mergeSort("profit");
+        sortTest = schedule.isSorted(sortedJobs);
+        if(sortTest){
+            System.out.println("Jobs were successfully sorted by Profit");
+        }
+        else{
+            System.out.println("!!!mergeSort by Profit Failed!");
+        }
+
+        //
+
+
 
     }
 }
