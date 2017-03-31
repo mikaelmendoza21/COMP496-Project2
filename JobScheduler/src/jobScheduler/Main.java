@@ -1,83 +1,84 @@
 package jobScheduler;
 
-import java.util.Scanner;
-
 public class Main {
 
     public static void main(String[] args) {
-	// Driver program here
+        int[] length = { 7,4,2,5};
+        int[] deadline = {7 ,16 ,8, 10};
+        int[] profit = { 10, 9, 14, 13};
+        JobScheduler js = new JobScheduler( length,deadline, profit);
+        System.out.println("Jobs to be scheduled");
+        System.out.println("Job format is " +
+                "(length, deadline, profit, start, finish)" );
+        js.printJobs();
 
-        Scanner reader = new Scanner(System.in);    //reader for Input
-        int[] job_length;
-        int[] job_deadline;
-        int[] job_profit;
-
-        //testing the Job & JobScheduler classes-----
-        System.out.print("How many jobs would you like to enter?: ");
-        int total_jobs = reader.nextInt();
-        job_length = new int[total_jobs];
-        job_deadline = new int[total_jobs];
-        job_profit = new int[total_jobs];
-
-        for(int i=0; i< total_jobs; i++){
-            System.out.println("\n\nJob #"+ (i + 1) + " -----");
-            System.out.print("\nJob length: ");
-            int length = reader.nextInt();
-            System.out.print("\nJob deadline: ");
-            int deadline = reader.nextInt();
-            System.out.print("\nJob profit: ");
-            int profit = reader.nextInt();
-
-            //Add the job to the JobScheduler arrays
-            job_length[i] = length;
-            job_deadline[i] = deadline;
-            job_profit[i] = profit;
-        }
-
-        //create the JobScheduler object
-        JobScheduler schedule = new JobScheduler(job_length, job_deadline, job_profit);
-        System.out.println("\nHere are the Jobs you wish to schedule" +
-                            "\n[Format: Job#(length, deadline, profit, start, finish)]");
-        schedule.printJobs();
-        //--------------------------
-
-        //Testing mergeSort by Deadline
-        System.out.println("\nTesting mergeSort by Deadline");
-
-        int[] sortedJobs = schedule.mergeSort("deadline");
-        boolean sortTest = schedule.isSorted(sortedJobs);
-        if(sortTest){
-            System.out.println("Jobs were successfully sorted by Deadline");
-        }
-        else{
-            System.out.println("!!!mergeSort by Deadline Failed!");
-        }
-
-        //Testing mergeSort by Length
-        System.out.println("\nTesting mergeSort by Length");
-        sortedJobs = schedule.mergeSort("length");
-        sortTest = schedule.isSorted(sortedJobs);
-        if(sortTest){
-            System.out.println("Jobs were successfully sorted by Length");
-        }
-        else{
-            System.out.println("!!!mergeSort by Length Failed!");
-        }
-
-        //Testing mergeSort by Profit
-        System.out.println("\nTesting mergeSort by Profit");
-        sortedJobs = schedule.mergeSort("profit");
-        sortTest = schedule.isSorted(sortedJobs);
-        if(sortTest){
-            System.out.println("Jobs were successfully sorted by Profit");
-        }
-        else{
-            System.out.println("!!!mergeSort by Profit Failed!");
-        }
-
-        //
+        //--------------------------------------------
+//        System.out.println("\nOptimal Solution Using Brute Force O(n!)");
+//        Schedule bestSchedule = js.bruteForceSolution();
+//        System.out.println( bestSchedule);
 
 
+        //---------------------------------------
+        System.out.println("\nEDF with unprofitable jobs last ");
+        Schedule EDFPSchedule = js.makeScheduleEDF();
+        System.out.println(EDFPSchedule);
+
+        //-------------------------------------
+        System.out.println("\nSJF with unprofitable jobs last");
+        Schedule SJFPSchedule = js.makeScheduleSJF();
+        System.out.println(SJFPSchedule);
+
+        //--------------------------------------------
+        System.out.println("\nHPF with unprofitable jobs last");
+        Schedule HPFSchedule = js.makeScheduleHPF();
+        System.out.println(HPFSchedule);
+
+        // ------------------------------
+//        System.out.println("\nYour own creative solution");
+//        Schedule NASSchedule = js.newApproxSchedule();
+//        System.out.println(NASSchedule);
 
     }
 }
+
+/*-----------------Sample Run -----------------------
+
+ Input: Jobs to be scheduled
+ Job format is (length, deadline, profit, start, finish)
+ #0:(7,7,10,-1,-1)
+ #1:(4,16,9,-1,-1)
+ #2:(2,8,14,-1,-1)
+ #3:(5,10,13,-1,-1)
+
+ Optimal Solution Using Brute Force O(n!)
+ Schedule Profit = 36
+ #3:(5,10,13,0,5)
+ #2:(2,8,14,5,7)
+ #1:(4,16,9,7,11)
+ #0:(7,7,10,11,18)
+
+ EDF with unprofitable jobs last
+ Schedule Profit = 19
+ #0:(7,7,10,0,7)
+ #1:(4,16,9,7,11)
+ #3:(5,10,13,11,16)
+ #2:(2,8,14,16,18)
+
+
+ SJF with unprofitable jobs last
+ Schedule Profit = 23
+ #2:(2,8,14,0,2)
+ #1:(4,16,9,2,6)
+ #0:(7,7,10,6,13)
+ #3:(5,10,13,13,18)
+
+ HPF with unprofitable jobs last
+ Schedule Profit = 36
+ #2:(2,8,14,0,2)
+ #3:(5,10,13,2,7)
+ #1:(4,16,9,7,11)
+ #0:(7,7,10,11,18)
+
+ Your own creative solution
+ <This will have your own answers>
+*/

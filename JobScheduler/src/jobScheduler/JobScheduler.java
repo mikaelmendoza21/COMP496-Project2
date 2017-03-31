@@ -9,11 +9,13 @@
 package jobScheduler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class JobScheduler
 {
     private int nJobs;
     private Job[]  jobs;
+    public int totalProfit = 0;
 
     public JobScheduler( int[] joblength, int[] deadline, int[] profit)
     {
@@ -23,7 +25,7 @@ public class JobScheduler
         //Fill jobs array. The kth job entered has JobNo = k;
         jobs = new Job[nJobs];
         for(int i = 0; i < nJobs; i++){
-            jobs[i] =  new Job(i+1, joblength[i], deadline[i], profit[i]);
+            jobs[i] =  new Job(i, joblength[i], deadline[i], profit[i]);
         }
     }
 
@@ -33,247 +35,201 @@ public class JobScheduler
             System.out.print("\n" + jobs[i].toString());
         }
     }
+    
 
 //    //Brute force. Try all n! orderings. Return the schedule with the most profit
 //    public Schedule bruteForceSolution()
 //    {   }
 //
 //
-//    public Schedule makeScheduleEDF()
-//    //earliest deadline first schedule. Schedule items contributing 0 to total profit last
-//    {  }
+    public Schedule makeScheduleEDF()
+    //earliest deadline first schedule. Schedule items contributing 0 to total profit last
+    { 
+        Schedule theSchedule = new Schedule();
+//        System.out.println("before");
+//        for (int i = 0; i < jobs.length; i++)
+//        {
+//            System.out.println("Job no " + jobs[i].jobNumber + " : " + jobs[i].deadline);
+//        }
+        sortByDeadline();
+//        System.out.println("after");
+//        for (int i = 0; i < jobs.length; i++)
+//        {
+//            System.out.println("Job no " + jobs[i].jobNumber + " : " + jobs[i].deadline);
+//        }
+        theSchedule.add(jobs[0]);
+        jobs[0].start = 0;
+        jobs[0].finish = jobs[0].getLength();
+        Job temp = jobs[0];
+        theSchedule.profit += jobs[0].profit;
+        for(int i = 1; i < jobs.length; i++)
+        {
+            if(!((jobs[i].deadline - jobs[i].length) < temp.finish))
+            {
+                System.out.println("adding " + jobs[i] + " to schedule...");
+                jobs[i].start = temp.finish;
+                jobs[i].finish = jobs[i].start + jobs[i].length;
+                temp = jobs[i];
+                theSchedule.add(jobs[i]);
+                theSchedule.profit += jobs[i].profit;
+            }
+        }
+        for(int i = 0; i < jobs.length; i++)
+        {
+            if(jobs[i].start == -1)
+            {
+                System.out.println("adding " + jobs[i] + " to schedule (no profit)...");
+                jobs[i].start = temp.finish;
+                jobs[i].finish = jobs[i].start + jobs[i].length;
+                temp = jobs[i];
+                theSchedule.add(jobs[i]);
+            }
+        }
+        
+        return theSchedule;
+    }
 //
-//    public Schedule makeScheduleSJF()
-//    //shortest job first schedule. Schedule items contributing 0 to total profit last
-//    {  }
-//
-//    public Schedule makeScheduleHPF()
-//    //highest profit first schedule. Schedule items contributing 0 to total profit last
-//    {
-//
-//    }
-//
-//
+    public Schedule makeScheduleSJF()
+    //shortest job first schedule. Schedule items contributing 0 to total profit last
+    { 
+        Schedule theSchedule = new Schedule();
+//        System.out.println("before");
+//        for (int i = 0; i < jobs.length; i++)
+//        {
+//            System.out.println("Job no " + jobs[i].jobNumber + " : " + jobs[i].length);
+//        }
+        sortByLength();
+//        System.out.println("after");
+//        for (int i = 0; i < jobs.length; i++)
+//        {
+//            System.out.println("Job no " + jobs[i].jobNumber + " : " + jobs[i].length);
+//        }
+        theSchedule.add(jobs[0]);
+        jobs[0].start = 0;
+        jobs[0].finish = jobs[0].getLength();
+        Job temp = jobs[0];
+        theSchedule.profit += jobs[0].profit;
+        for(int i = 1; i < jobs.length; i++)
+        {
+            if(!((jobs[i].deadline - jobs[i].length) < temp.finish))
+            {
+                System.out.println("adding " + jobs[i] + " to schedule...");
+                jobs[i].start = temp.finish;
+                jobs[i].finish = jobs[i].start + jobs[i].length;
+                temp = jobs[i];
+                theSchedule.add(jobs[i]);
+                theSchedule.profit += jobs[i].profit;
+            }
+        }
+        for(int i = 0; i < jobs.length; i++)
+        {
+            if(jobs[i].start == -1)
+            {
+                System.out.println("adding " + jobs[i] + " to schedule (no profit)...");
+                jobs[i].start = temp.finish;
+                jobs[i].finish = jobs[i].start + jobs[i].length;
+                temp = jobs[i];
+                theSchedule.add(jobs[i]);
+            }
+        }
+
+        return theSchedule;
+    }
+
+    public Schedule makeScheduleHPF()
+    //highest profit first schedule. Schedule items contributing 0 to total profit last
+    { 
+        Schedule theSchedule = new Schedule();
+//        System.out.println("before");
+//        for (int i = 0; i < jobs.length; i++)
+//        {
+//            System.out.println("Job no " + jobs[i].jobNumber + " : " + jobs[i].profit);
+//        }
+        sortByProfit();
+//        System.out.println("after");
+//        for (int i = 0; i < jobs.length; i++)
+//        {
+//            System.out.println("Job no " + jobs[i].jobNumber + " : " + jobs[i].profit);
+//        }
+        theSchedule.add(jobs[0]);
+        jobs[0].start = 0;
+        jobs[0].finish = jobs[0].getLength();
+        Job temp = jobs[0];
+        theSchedule.profit += jobs[0].profit;
+        
+        for(int i = 1; i < jobs.length; i++)
+        {
+            if(!((jobs[i].deadline - jobs[i].length) < temp.finish))
+            {
+                System.out.println("adding " + jobs[i] + " to schedule...");
+                jobs[i].start = temp.finish;
+                jobs[i].finish = jobs[i].start + jobs[i].length;
+                temp = jobs[i];
+                theSchedule.add(jobs[i]);
+                theSchedule.profit += jobs[i].profit;
+            }
+        }
+        for(int i = 0; i < jobs.length; i++)
+        {
+            if(jobs[i].start == -1)
+            {
+                System.out.println("adding " + jobs[i] + " to schedule (no profit)...");
+                jobs[i].start = temp.finish;
+                jobs[i].finish = jobs[i].start + jobs[i].length;
+                temp = jobs[i];
+                theSchedule.add(jobs[i]);
+            }
+        }
+        
+        
+        return theSchedule;
+        
+    }
+
+
 //    public Schedule newApproxSchedule() //Your own creation. Must be <= O(n3)
 //    {  }
-
-    public int[] mergeSort(String attribute)
-    /* This mergeSort sorts the jobs[] from lowest to highest according to the attribute specified
-       valid attribute values are 'length', 'deadline' and 'profit'
-       It then mergesorts the jobs[] array indexes into an int array and returns it
-    */
+    public void sortByDeadline()
     {
-        int size = jobs.length;
-        int[] indexes = new int[size];
-
-        //error-handling for invalid 'attribute' values
-        if(attribute != "length" && attribute != "deadline" && attribute != "profit"){
-            System.out.println("Invalid 'attribute' value!!");
-            return null;
-        }
-
-        //mergesort indexes
-        recursiveMergeSort(0,(size -1), attribute);
-
-        return indexes;
+        Job temp = new Job();
+        for(int i = 1; i < jobs.length; i++) {
+		for(int j = 0; j < jobs.length - i; j++) {
+			if(jobs[j].deadline > jobs[j+1].deadline) {
+				temp = jobs[j+1];
+				jobs[j+1] = jobs[j];
+				jobs[j] = temp;
+			}
+		}
+	}
     }
-
-    private int[] recursiveMergeSort(int lowerIndex,int upperIndex, String attribute)
-    //recursive function for MergeSort. It returns a fully sorted index array
+    
+    public void sortByLength()
     {
-        int size = upperIndex - lowerIndex;
-        int[] indexes;
-        int middle = (lowerIndex + upperIndex)/2;// split array in half
-        int[] firstHalf;
-        int[] secondHalf;
-
-        //progress print (a period each time this function is called
-        System.out.println(".");
-
-        //Base case
-        if(upperIndex > lowerIndex) {  //else there are more than 1 element in the sub-array
-
-            //mergesort each half Recursively
-            firstHalf = recursiveMergeSort(lowerIndex, middle, attribute);
-            secondHalf = recursiveMergeSort((middle+1), upperIndex, attribute);
-
-            //merge both halves, choose 'merge' according to 'attribute'
-            switch(attribute){
-                case "length":
-                    indexes = mergeLengths(lowerIndex, middle, upperIndex);
-                    break;
-
-                case "deadline":
-                    indexes = mergeDeadlines(lowerIndex, middle, upperIndex);
-                    break;
-
-                case "profit":
-                    indexes = mergeProfits(lowerIndex, middle, upperIndex);
-                    break;
-
-                default:
-                    indexes = null; //Error-handling
-                    break;
-            }
-        }
-        else { // base case (k==i) -Do Nothing
-            indexes =  new int[]{lowerIndex};
-        }
-
-        return indexes;
+        Job temp = new Job();
+        for(int i = 1; i < jobs.length; i++) {
+		for(int j = 0; j < jobs.length - i; j++) {
+			if(jobs[j].length > jobs[j+1].length) {
+				temp = jobs[j+1];
+				jobs[j+1] = jobs[j];
+				jobs[j] = temp;
+			}
+		}
+	}
     }
-
-    private int[] mergeLengths(int lowerIndex, int middle , int upperIndex)
-    //performs the merge function for mergeSort according to 'length' values
+    
+    public void sortByProfit()
     {
-        int size = upperIndex - lowerIndex;
-        int lowerPointer =lowerIndex;
-        int upperPointer = upperIndex +1;
-        int i =0;
-        int[] indexes = new int[size];
-
-        //iterate through both 'halves'
-        while(lowerPointer <= middle && upperPointer <= upperIndex){
-
-            if(jobs[lowerPointer].length <= jobs[upperPointer].length ){
-                indexes[i] = lowerPointer;
-                lowerPointer++;
-            }
-            else{
-                indexes[i] = upperPointer;
-                upperPointer++;
-            }
-            i++;
-        }
-
-        //add remainder of each half (if there are elements left in either)
-        if(lowerPointer <= middle){
-            for(int j= lowerIndex; lowerPointer<(middle+1); lowerPointer++){
-                indexes[j] = lowerPointer;
-                j++;
-            }
-
-        }
-        else if (upperPointer <= upperIndex){
-            for(int j= lowerIndex; upperPointer<(upperIndex+1); upperPointer++){
-                indexes[j] = upperPointer;
-                j++;
-            }
-        }
-
-        else{} //done merging
-
-        return indexes;
+        Job temp = new Job();
+        for(int i = 1; i < jobs.length; i++) {
+		for(int j = 0; j < jobs.length - i; j++) {
+			if(jobs[j].profit < jobs[j+1].profit) {
+				temp = jobs[j+1];
+				jobs[j+1] = jobs[j];
+				jobs[j] = temp;
+			}
+		}
+	}
     }
-
-    private int[] mergeDeadlines(int lowerIndex, int middle , int upperIndex)
-    //performs the merge function for mergeSort according to 'deadline' values
-    {
-        int size = upperIndex - lowerIndex;
-        int lowerPointer =lowerIndex;
-        int upperPointer = upperIndex +1;
-        int i =0;
-        int[] indexes = new int[size];
-
-        //iterate through both 'halves'
-        while(lowerPointer <= middle && upperPointer <= upperIndex){
-
-            if(jobs[lowerPointer].deadline <= jobs[upperPointer].deadline ){
-                indexes[i] = lowerPointer;
-                lowerPointer++;
-            }
-            else{
-                indexes[i] = upperPointer;
-                upperPointer++;
-            }
-            i++;
-        }
-
-        //add remainder of each half (if there are elements left in either)
-        if(lowerPointer <= middle){
-            for(; lowerPointer<(middle+1); lowerPointer++){
-                indexes[i] = lowerPointer;
-                i++;
-            }
-
-        }
-        else if (upperPointer <= upperIndex){
-            for(; upperPointer<(upperIndex+1); upperPointer++){
-                indexes[i] = upperPointer;
-                i++;
-            }
-        }
-
-        else{} //done merging
-
-        return indexes;
-    }
-
-    private int[] mergeProfits(int lowerIndex, int middle , int upperIndex)
-    //performs the merge function for mergeSort according to 'length' values
-    {
-        int size = upperIndex - lowerIndex;
-        int lowerPointer =lowerIndex;
-        int upperPointer = upperIndex +1;
-        int i =0;
-        int[] indexes = new int[size];
-
-        //iterate through both 'halves'
-        while(lowerPointer <= middle && upperPointer <= upperIndex){
-
-            if(jobs[lowerPointer].profit <= jobs[upperPointer].profit ){
-                indexes[i] = lowerPointer;
-                lowerPointer++;
-            }
-            else{
-                indexes[i] = upperPointer;
-                upperPointer++;
-            }
-            i++;
-        }
-
-        //add remainder of each half (if there are elements left in either)
-        if(lowerPointer <= middle){
-            for(; lowerPointer<(middle+1); lowerPointer++){
-                indexes[i] = lowerPointer;
-                i++;
-            }
-
-        }
-        else if (upperPointer <= upperIndex){
-            for(; upperPointer<(upperIndex+1); upperPointer++){
-                indexes[i] = upperPointer;
-                i++;
-            }
-        }
-
-        else{} //done merging
-
-        return indexes;
-    }
-
-    //This function checks if the array a[] is sorted or not (TESTED)
-    public static boolean isSorted( int[] a) {
-        boolean sorted = true;
-        int index = 0;
-        int arraySize = a.length;
-
-        //Check if is sorted, breaking out as soon as 2 elements are not in order
-        while(sorted && (index + 1)< arraySize){
-            if(a[index] < a[index + 1] || a[index] == a[index+1]){
-                //still sorted
-            } else {    //(a[index] > a[index+1])
-                sorted = false;
-            }
-            index++;
-        }
-
-        boolean answer = sorted;    //'sorted' will be true/false depending on while loop
-
-        return answer;
-    }
-
-
 
 }//end of JobScheduler class
 
@@ -293,6 +249,15 @@ class Job
         jobNumber = jn; length = len; deadline = d;
         profit = p;  start = -1;  finish = -1;
     }
+    public Job()
+    {
+        jobNumber = -1;
+        length = -1;
+        deadline = -1;
+        profit = -1;
+        start = -1;
+        finish = -1;
+    }
 
     //this method outputs the Job as a String specifying its attributes
     public String toString()
@@ -301,6 +266,37 @@ class Job
                 + deadline + "," + profit +
                 "," + start + "," + finish + ")";
     }
+    
+    public int getDeadline()
+    {
+        return deadline;
+    }
+    
+    public int getLength()
+    {
+        return length;
+    }
+    
+    public int getJobNumber()
+    {
+        return jobNumber;
+    }
+    
+    public void setStart(int theStart)
+    {
+        this.start = theStart;
+    }
+    
+    public void setFinish(int theFinish)
+    {
+        this.finish = theFinish;
+    }
+    public void zeroProfit()
+    {
+        profit = 0;
+    }
+    
+    
 
 }//end of Job class
 
@@ -340,5 +336,5 @@ class Schedule
 
         return s;
     }
-}// end of Schedule class
 
+}// end of Schedule class
