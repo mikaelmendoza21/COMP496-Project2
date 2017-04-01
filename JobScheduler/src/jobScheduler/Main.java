@@ -20,16 +20,20 @@ public class Main {
 
         //---------------------------------------
         System.out.println("\nEDF with unprofitable jobs last ");
+        js = new JobScheduler(length,deadline, profit);
         Schedule EDFPSchedule = js.makeScheduleEDF();
+
         System.out.println(EDFPSchedule);
 
         //-------------------------------------
         System.out.println("\nSJF with unprofitable jobs last");
+        js = new JobScheduler(length,deadline, profit);
         Schedule SJFPSchedule = js.makeScheduleSJF();
         System.out.println(SJFPSchedule);
 
         //--------------------------------------------
         System.out.println("\nHPF with unprofitable jobs last");
+        js = new JobScheduler(length,deadline, profit);
         Schedule HPFSchedule = js.makeScheduleHPF();
         System.out.println(HPFSchedule);
 
