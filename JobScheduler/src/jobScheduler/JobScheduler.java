@@ -8,14 +8,14 @@
 
 package jobScheduler;
 
-import jdk.nashorn.internal.scripts.JO;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class JobScheduler
 {
     private int nJobs;
     private Job[]  jobs;
+    private static Schedule best = new Schedule();
 
     public JobScheduler( int[] joblength, int[] deadline, int[] profit)
     {
@@ -36,79 +36,58 @@ public class JobScheduler
         }
     }
 
-        //Brute force. Try all n! orderings. Return the schedule with the most profit
+    //Brute force. Try all n! orderings. Return the schedule with the most profit
     public Schedule bruteForceSolution()
     {
-        Job[] initialJobs = jobs.clone();
-        Job[] temp = new Job[nJobs];
+        Job[] jobList = jobs.clone();
 
-        //create initial schedule
-        Schedule initialSchedule = createSchedule(initialJobs);
-        int max = initialSchedule.getProfit();
+        Schedule BFSchedule = new Schedule();
+        for(int i = 0; i < nJobs; i++)
+        {
+            jobList[i].finish = -1;
+            jobList[i].start = -1;
+        }
 
-        Job[] jobsInSchedule = recursiveBruteForce(0, initialJobs, temp, max);
+        ArrayList<Job> arr = new ArrayList<Job>(Arrays.asList(jobList));
+        BFSchedule.addMultiple( permute(arr, 0));
+        BFSchedule = createSchedule(BFSchedule.getJobs());
 
-        //temp
-        System.out.println("---jobsInSchedule size = " + jobsInSchedule.length);
-        //
-
-        //Create Schedule
-        Schedule BFSchedule = createSchedule(jobsInSchedule);
-        //temp
-        System.out.println("---"+ BFSchedule.toString());
+        //Temp
+        System.out.println("Back from permute(), BFSchedule = "+ BFSchedule.toString());
         //
 
         return BFSchedule;
     }
 
-    public Job[] recursiveBruteForce(int index, Job[] initialJobs, Job[] temp, int max){
+    protected Job[] permute(java.util.List<Job> arr, int k){
 
-        Job[] currentBest = initialJobs;
+        Job[] temp = new Job[arr.size()];
+        Schedule tempSchedule;
 
-        if(index >= nJobs - 1){ //If we are at the last element - nothing left to permute
-//            //Print the array
-//            System.out.print("[");
-//            for(int i = 0; i < nJobs - 1; i++){
-//                System.out.print(temp[i] + ", ");
-//            }
-//            if(temp.length > 0)
-//                System.out.print(temp[temp.length - 1]);
-//            System.out.println("]");
-
+        for(int i = k; i < arr.size(); i++){
+            java.util.Collections.swap(arr, i, k);
+            temp = permute(arr, k+1);
+            java.util.Collections.swap(arr, k, i);
         }
-        else{
+        if (k == arr.size() -1) {
 
-            for(int i = index; i < nJobs; i++) { //For each index in the sub array arr[index...end]
+            Job[] theJobs = arr.toArray(new Job[arr.size()]);
+            for (int i = 0; i < nJobs; i++) {
+                theJobs[i].start = -1;
+                theJobs[i].finish = -1;
+            }
+            tempSchedule= createSchedule(theJobs);
 
-                //Swap the elements at indices index and i
-                Job t = initialJobs[index];
-
-                temp[index] = temp[i];
-                temp[i] = t;
-
-                //Recurse on the sub array arr[index+1...end]
-                temp = recursiveBruteForce(index + 1, initialJobs, temp, max);
-
-                //Swap the elements back
-                t = temp[index];
-                temp[index] = temp[i];
-                temp[i] = t;
-
-                //Create a Schedule from current Permutation
-                Schedule currentPermutation = createSchedule(temp);
-
-                if(currentPermutation.getProfit() > max){
-                    currentBest = temp;
-                    max = currentPermutation.getProfit();
-                }
+            if (tempSchedule.getProfit() > best.getProfit()) {
+                best = tempSchedule;
+                System.out.println("Best schedule: " + best);
+                System.out.println("best profit so far: " + tempSchedule.getProfit());
             }
         }
-
-
-        return currentBest;
+        return best.getJobs();
     }
 
-//
+
     public Schedule makeScheduleEDF()
     //earliest deadline first schedule. Schedule items contributing 0 to total profit last
     {
@@ -203,19 +182,30 @@ public class JobScheduler
             return null;
         }
 
-        Schedule theSchedule = new Schedule();
+        for(int i = 0; i < sortedJobs.length; i++)
+        {
+            sortedJobs[i].finish = -1;
+            sortedJobs[i].start = -1;
+        }
 
-        theSchedule.add(sortedJobs[0]);
+        //temp
+        System.out.println("In Create Schedule sortedJobs="+ Arrays.toString(sortedJobs));
+        // /
+
+        Schedule theSchedule = new Schedule();
         sortedJobs[0].start = 0;
         sortedJobs[0].finish = sortedJobs[0].getLength();
+        theSchedule.add(sortedJobs[0]);
+
         Job temp = sortedJobs[0];
         theSchedule.profit += sortedJobs[0].profit;
 
-        for(int i = 1; i < nJobs; i++)
+        for(int i = 1; i < sortedJobs.length; i++)
         {
             if(!((sortedJobs[i].deadline - sortedJobs[i].length) < temp.finish))
             {
-                System.out.println("adding " + sortedJobs[i] + " to schedule...");
+                //System.out.println("adding " + sortedJobs[i] + " to schedule...");
+                //System.out.println("finish for job: " + sortedJobs[i].finish);
                 sortedJobs[i].start = temp.finish;
                 sortedJobs[i].finish = sortedJobs[i].start + sortedJobs[i].length;
                 temp = sortedJobs[i];
@@ -223,11 +213,11 @@ public class JobScheduler
                 theSchedule.profit += sortedJobs[i].profit;
             }
         }
-        for(int i = 0; i < nJobs; i++)
+        for(int i = 1; i < sortedJobs.length; i++)
         {
-            if(sortedJobs[i].start == -1)
+            if(sortedJobs[i].start  == -1 || sortedJobs[i].finish == -1)
             {
-                System.out.println("adding " + jobs[i] + " to schedule (no profit)...");
+                //System.out.println("adding " + jobs[i] + " to schedule (no profit)...");
                 sortedJobs[i].start = temp.finish;
                 sortedJobs[i].finish = sortedJobs[i].start + sortedJobs[i].length;
                 temp = sortedJobs[i];
@@ -321,11 +311,12 @@ class Schedule {
 
     public void add(Job job) {
         schedule.add(job);  //add job to schedule
+
     }
 
     //add multiple Jobs to Schedule
-    public void addMultiple(Job[] newJobs){
-        for(int i=0; i< newJobs.length; i++){
+    public void addMultiple(Job[] newJobs) {
+        for (int i = 0; i < newJobs.length; i++) {
             schedule.add(newJobs[i]);
         }
     }
@@ -343,5 +334,9 @@ class Schedule {
         }
 
         return s;
+    }
+
+    public Job[] getJobs(){
+        return schedule.toArray(new Job[schedule.size()]);
     }
 }

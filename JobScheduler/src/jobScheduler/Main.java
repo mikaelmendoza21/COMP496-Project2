@@ -13,9 +13,10 @@ public class Main {
         js.printJobs();
 
         //--------------------------------------------
-//        System.out.println("\nOptimal Solution Using Brute Force O(n!)");
-//        Schedule bestSchedule = js.bruteForceSolution();
-//        System.out.println( bestSchedule);
+        System.out.println("\n\nOptimal Solution Using Brute Force O(n!)");
+        js = new JobScheduler(length,deadline, profit);
+        Schedule bestSchedule = js.bruteForceSolution();
+        System.out.println( bestSchedule);
 
 
         //---------------------------------------
