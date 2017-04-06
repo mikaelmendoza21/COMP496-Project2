@@ -84,7 +84,7 @@ public class JobScheduler
 
     }
 
-    public Schedule newApproxSchedule() //Your own creation. Must be <= O(n3)
+    public Schedule newApproxSchedule() //Greedy-Choice: Greatest Profit/Length First
     {
         Schedule NASSchedule;
 
@@ -98,8 +98,8 @@ public class JobScheduler
 
 
     /* HELPER METHODS
-       The methods below are called by the Scheduling Algorithm to perform Sorts and creating Schedules
-       These were added by the Programmers to simplify and reuse certain methods across the Scheduling algorithms
+       The methods below are called by the Scheduling Algorithms to perform Sorts and creating Schedules
+       These were added by the Programmers to simplify and reuse certain methods across all Scheduling algorithms
      */
 
     //this method recursively  produces all Permutations of jobs[]
