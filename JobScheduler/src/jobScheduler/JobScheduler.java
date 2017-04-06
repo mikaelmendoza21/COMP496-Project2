@@ -15,7 +15,7 @@ public class JobScheduler
 {
     private int nJobs;
     private Job[]  jobs;
-    private static Schedule best = new Schedule();
+    private static Schedule best = new Schedule();  //keeps track of Best Schedule for Brutal Force solution
 
     public JobScheduler( int[] joblength, int[] deadline, int[] profit)
     {
@@ -49,42 +49,10 @@ public class JobScheduler
         }
 
         ArrayList<Job> arr = new ArrayList<Job>(Arrays.asList(jobList));
-        BFSchedule.addMultiple( permute(arr, 0));
+        BFSchedule.addMultiple( permute(arr, 0));   //call to permute() to recursively evaluate all n! orderings
         BFSchedule = createSchedule(BFSchedule.getJobs());
 
-        //Temp
-        System.out.println("Back from permute(), BFSchedule = "+ BFSchedule.toString());
-        //
-
         return BFSchedule;
-    }
-
-    protected Job[] permute(java.util.List<Job> arr, int k){
-
-        Job[] temp = new Job[arr.size()];
-        Schedule tempSchedule;
-
-        for(int i = k; i < arr.size(); i++){
-            java.util.Collections.swap(arr, i, k);
-            temp = permute(arr, k+1);
-            java.util.Collections.swap(arr, k, i);
-        }
-        if (k == arr.size() -1) {
-
-            Job[] theJobs = arr.toArray(new Job[arr.size()]);
-            for (int i = 0; i < nJobs; i++) {
-                theJobs[i].start = -1;
-                theJobs[i].finish = -1;
-            }
-            tempSchedule= createSchedule(theJobs);
-
-            if (tempSchedule.getProfit() > best.getProfit()) {
-                best = tempSchedule;
-                System.out.println("Best schedule: " + best);
-                System.out.println("best profit so far: " + tempSchedule.getProfit());
-            }
-        }
-        return best.getJobs();
     }
 
 
@@ -116,10 +84,52 @@ public class JobScheduler
 
     }
 
-    //    public Schedule newApproxSchedule() //Your own creation. Must be <= O(n3)
-//    {  }
+    public Schedule newApproxSchedule() //Your own creation. Must be <= O(n3)
+    {
+        Schedule NASSchedule;
 
-    public Job[] sortByDeadline()
+        Job[] jobList = sortByProfitOverLength();
+
+        NASSchedule = createSchedule(jobList);
+
+        return NASSchedule;
+
+    }
+
+
+    /* HELPER METHODS
+       The methods below are called by the Scheduling Algorithm to perform Sorts and creating Schedules
+       These were added by the Programmers to simplify and reuse certain methods across the Scheduling algorithms
+     */
+
+    //this method recursively  produces all Permutations of jobs[]
+    private Job[] permute(java.util.List<Job> arr, int k){
+
+        Job[] temp = new Job[arr.size()];
+        Schedule tempSchedule;
+
+        for(int i = k; i < arr.size(); i++){
+            java.util.Collections.swap(arr, i, k);
+            temp = permute(arr, k+1);
+            java.util.Collections.swap(arr, k, i);
+        }
+        if (k == arr.size() -1) {
+
+            Job[] theJobs = arr.toArray(new Job[arr.size()]);
+            for (int i = 0; i < nJobs; i++) {
+                theJobs[i].start = -1;
+                theJobs[i].finish = -1;
+            }
+            tempSchedule= createSchedule(theJobs);
+
+            if (tempSchedule.getProfit() > best.getProfit()) {
+                best = tempSchedule;
+            }
+        }
+        return best.getJobs();
+    }
+
+    private Job[] sortByDeadline()
     {
         //make a clone of 'jobs'
         Job[] sortedJobs = jobs.clone();
@@ -138,7 +148,7 @@ public class JobScheduler
         return sortedJobs;
     }
 
-    public Job[] sortByLength()
+    private Job[] sortByLength()
     {
         //make a clone of 'jobs'
         Job[] sortedJobs = jobs.clone();
@@ -157,7 +167,7 @@ public class JobScheduler
         return sortedJobs;
     }
 
-    public Job[] sortByProfit()
+    private Job[] sortByProfit()
     {
         //make a clone of 'jobs'
         Job[] sortedJobs = jobs.clone();
@@ -176,8 +186,28 @@ public class JobScheduler
         return sortedJobs;
     }
 
+    //This custom Sorting would make the Greedy Choice of maximizing Profit per Length
+    //Short and Profitable jobs will have priority
+    private Job[] sortByProfitOverLength(){
+        //make a clone of 'jobs'
+        Job[] sortedJobs = jobs.clone();
+
+        Job temp ; //= new Job();
+        for(int i = 1; i < sortedJobs.length; i++) {
+            for(int j = 0; j < sortedJobs.length - i; j++) {
+                if((sortedJobs[j].profit / sortedJobs[j].length) < (sortedJobs[j+1].profit / sortedJobs[j+1].length)) {
+                    temp = sortedJobs[j+1];
+                    sortedJobs[j+1] = sortedJobs[j];
+                    sortedJobs[j] = temp;
+                }
+            }
+        }
+
+        return sortedJobs;
+    }
+
     //this method is called by the scheduling algorithms after sorting 'jobs'
-    protected Schedule createSchedule(Job[] sortedJobs){
+    private Schedule createSchedule(Job[] sortedJobs){
         if(sortedJobs == null){
             return null;
         }
@@ -187,10 +217,6 @@ public class JobScheduler
             sortedJobs[i].finish = -1;
             sortedJobs[i].start = -1;
         }
-
-        //temp
-        System.out.println("In Create Schedule sortedJobs="+ Arrays.toString(sortedJobs));
-        // /
 
         Schedule theSchedule = new Schedule();
         sortedJobs[0].start = 0;
@@ -204,8 +230,6 @@ public class JobScheduler
         {
             if(!((sortedJobs[i].deadline - sortedJobs[i].length) < temp.finish))
             {
-                //System.out.println("adding " + sortedJobs[i] + " to schedule...");
-                //System.out.println("finish for job: " + sortedJobs[i].finish);
                 sortedJobs[i].start = temp.finish;
                 sortedJobs[i].finish = sortedJobs[i].start + sortedJobs[i].length;
                 temp = sortedJobs[i];
@@ -217,7 +241,6 @@ public class JobScheduler
         {
             if(sortedJobs[i].start  == -1 || sortedJobs[i].finish == -1)
             {
-                //System.out.println("adding " + jobs[i] + " to schedule (no profit)...");
                 sortedJobs[i].start = temp.finish;
                 sortedJobs[i].finish = sortedJobs[i].start + sortedJobs[i].length;
                 temp = sortedJobs[i];
@@ -264,36 +287,10 @@ class Job
                 "," + start + "," + finish + ")";
     }
 
-    public int getDeadline()
-    {
-        return deadline;
-    }
-
     public int getLength()
     {
         return length;
     }
-
-    public int getJobNumber()
-    {
-        return jobNumber;
-    }
-
-    public void setStart(int theStart)
-    {
-        this.start = theStart;
-    }
-
-    public void setFinish(int theFinish)
-    {
-        this.finish = theFinish;
-    }
-    public void zeroProfit()
-    {
-        profit = 0;
-    }
-
-
 
 }//end of Job class
 
